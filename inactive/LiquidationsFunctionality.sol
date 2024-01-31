@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.19;
 import "./BaseFunctionality.sol";
 
@@ -52,12 +52,12 @@ function payOwed(uint256 amount, address target) public returns(uint256) {
 
     function setOwedAmounts(address partyA, address partyB, uint256 amountA) external  {
             owedAmounts[partyA][partyB] = amountA;
-        }  // To set owedAmounts
+        }  
 
 
     function decreaseTotalOwedAmounts(address partyA, uint256 amount) external {
             totalOwedAmounts[partyA] -= amount;
-        }  // To decrease j
+        }  
 
 
 }

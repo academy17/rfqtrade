@@ -1,10 +1,9 @@
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.19;
-//ABSTRACT CONTRACTS ACT LIKE WRAPPER, SETTER/GETTERS GO IN HERE
 import "./AppStorage.sol";
 
 abstract contract BaseFunctionality is AppStorage {
-//GETTERS
+
     function getBCloseQuoteContractIds(uint256 bCloseQuoteId) public view returns(uint256[] memory) {
         bCloseQuote memory _bCloseQuote = bCloseQuotes[bCloseQuoteId];
         return _bCloseQuote.bContractIds;
@@ -79,7 +78,6 @@ abstract contract BaseFunctionality is AppStorage {
         return sponsorReward[addr];
     }
 
-//INCREMENT/DECREMENT
     function incrementbCloseQuotes() internal {
         bCloseQuotesLength++;
     }
@@ -96,7 +94,6 @@ abstract contract BaseFunctionality is AppStorage {
         openPositionNumber[user]--;
     }
 
-//SETTER FUNCTIONS
     function setBalance(address _party, uint256 _amount) internal {
         balances[_party] = _amount;
     }
@@ -116,13 +113,13 @@ abstract contract BaseFunctionality is AppStorage {
     }   
 
 
-    function setBCloseQuoteQtyZero(uint256 bCloseQuoteId, uint256 index) internal { //@audit
+    function setBCloseQuoteQtyZero(uint256 bCloseQuoteId, uint256 index) internal { 
             bCloseQuote storage _bCloseQuote = bCloseQuotes[bCloseQuoteId];
             _bCloseQuote.qty[index] = 0;
 
     }
 
-    function setBCloseQuoteState(uint256 bCloseQuoteId, _State state) internal { //@audit
+    function setBCloseQuoteState(uint256 bCloseQuoteId, _State state) internal { 
             bCloseQuote storage _bCloseQuote = bCloseQuotes[bCloseQuoteId];
             _bCloseQuote.state = state;
 
@@ -208,27 +205,5 @@ abstract contract BaseFunctionality is AppStorage {
         emit openCloseQuoteEvent(msg.sender, bCloseQuotesLength, _bContractIds, _price, _qty, _limitOrStop, _expiration);
         incrementbCloseQuotes();
     }
-
-
-/*
-    function getBCloseQuoteContractIds(uint256 bCloseQuoteId) internal view virtual returns(uint256[] memory); 
-    function getBCloseQuotePrices(uint256 bCloseQuoteId) internal view virtual returns(uint256[] memory); 
-    function getOpenPositionNumber(address user) internal view virtual returns (uint256); 
-    function getBContractMemory(uint256 id) internal view virtual returns (bContract memory); 
-    function getBalance(address account) internal view virtual returns (uint256); 
-    function getBOracleLength() public view virtual returns (uint256);
-    function getBOracle(uint256 id) public view virtual returns (bOracle memory);
-    function getBContractLength() public view virtual returns (uint256); 
-    function getBContract(uint256 id) public view virtual returns (bContract memory); 
-    function getBCloseQuotesLength() public view virtual returns (uint256); 
-    function getBCloseQuote(uint256 id) public view virtual returns (bCloseQuote memory); 
-    function getOwedAmount(address owner, address spender) public view virtual returns (uint256); 
-    function getTotalOwedAmount(address addr) public view virtual returns (uint256); 
-    function getTotalOwedAmountPaid(address addr) public view virtual returns (uint256); 
-    function getGracePeriodLockedWithdrawBalance(address addr) public view virtual returns (uint256); 
-    function getGracePeriodLockedTime(address addr) public view virtual returns (uint256); 
-    function getMinimumOpenPartialFillNotional(address addr) public view virtual returns (uint256); 
-    function getSponsorReward(address addr) public view virtual returns (uint256); 
-*/
 
     }
