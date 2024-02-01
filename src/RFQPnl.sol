@@ -7,7 +7,6 @@ import "./RFQTrade.sol";
 contract RFQPnl is Initializable {
 
     RFQTrade public rfq;
-
     function initialize(address _rfq_address) public initializer {
         rfq = RFQTrade(_rfq_address);
     }

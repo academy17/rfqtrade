@@ -176,13 +176,6 @@ contract RFQTrade is Initializable, OwnableUpgradeable {
         bOracleLength++;
     }
 
-    modifier onlyRFQContracts() {
-        require(
-            msg.sender == QUOTES_CONTRACT ||
-            msg.sender == LIQUIDATIONS_CONTRACT ||
-            msg.sender == CLOSE_POSITIONS_CONTRACT);
-            _;
-    }
 
     function setQuotesContract(address _quotesContract) external onlyOwner { 
         QUOTES_CONTRACT = _quotesContract;
@@ -395,27 +388,27 @@ contract RFQTrade is Initializable, OwnableUpgradeable {
         return sponsorReward[addr];
     }
 
-    function incrementbCloseQuotes() public onlyRFQContracts {
+    function incrementbCloseQuotes() public  {
         bCloseQuotesLength++;
     }
 
-    function incrementbContractLength() external onlyRFQContracts  {
+    function incrementbContractLength() external   {
         bContractLength++;
     }
 
-    function incrementOpenPositionNumber(address user) external onlyRFQContracts  {
+    function incrementOpenPositionNumber(address user) external   {
         openPositionNumber[user]++;
     }
 
-    function decrementOpenPositionNumber(address user) external onlyRFQContracts  {
+    function decrementOpenPositionNumber(address user) external   {
         openPositionNumber[user]--;
     }
 
-    function setBalance(address _party, uint256 _amount) external onlyRFQContracts() {
+    function setBalance(address _party, uint256 _amount) external  {
         balances[_party] = _amount;
     }
 
-    function setBContractParty(address _party, uint256 bContractID, bool isPartyA) external onlyRFQContracts {
+    function setBContractParty(address _party, uint256 bContractID, bool isPartyA) external  {
             bContract storage newContract = bContracts[bContractID];
             if(isPartyA) {
                 newContract.partyA = _party;
@@ -424,55 +417,55 @@ contract RFQTrade is Initializable, OwnableUpgradeable {
             }
     }
 
-    function setBContractQuantity(uint256 bContractId, uint256 _qty) external onlyRFQContracts {
+    function setBContractQuantity(uint256 bContractId, uint256 _qty) external  {
         bContract storage newContract = bContracts[bContractId];
         newContract.qty = _qty;
     }   
 
 
-    function setBCloseQuoteQtyZero(uint256 bCloseQuoteId, uint256 index) external onlyRFQContracts { 
+    function setBCloseQuoteQtyZero(uint256 bCloseQuoteId, uint256 index) external  { 
             bCloseQuote storage _bCloseQuote = bCloseQuotes[bCloseQuoteId];
             _bCloseQuote.qty[index] = 0;
 
     }
 
-    function setBCloseQuoteState(uint256 bCloseQuoteId, _State state) external onlyRFQContracts { 
+    function setBCloseQuoteState(uint256 bCloseQuoteId, _State state) external  { 
             bCloseQuote storage _bCloseQuote = bCloseQuotes[bCloseQuoteId];
             _bCloseQuote.state = state;
 
     }
     
 
-    function setBContractAffiliate(uint256 bContractId, address _backEndAffiliate) external onlyRFQContracts {
+    function setBContractAffiliate(uint256 bContractId, address _backEndAffiliate) external  {
         bContract storage newContract = bContracts[bContractId];
         newContract.backEndAffiliate = _backEndAffiliate;
     }
 
-    function setBContractState(uint256 bContractId, _State newState) external onlyRFQContracts {
+    function setBContractState(uint256 bContractId, _State newState) external  {
             bContract storage newContract = bContracts[bContractId];
             newContract.state = newState;
     }
 
-    function setBContractPrice(uint256 bContractID, uint256 _price) external onlyRFQContracts {
+    function setBContractPrice(uint256 bContractID, uint256 _price) external  {
             bContract storage newContract = bContracts[bContractID];
             newContract.price = _price;
     }
 
-    function setBContractOpenTime(uint256 _bContractId, uint256 _openTime) external onlyRFQContracts {
+    function setBContractOpenTime(uint256 _bContractId, uint256 _openTime) external  {
         bContract storage newContract = bContracts[_bContractId];
         newContract.openTime = _openTime;
     }
 
-    function setBContractStateMemory(bContract memory _bContract, _State newState) external onlyRFQContracts {
+    function setBContractStateMemory(bContract memory _bContract, _State newState) external  {
         
         _bContract.state = newState;
     }
 
-    function setBContractCancelTimeMemory(bContract memory _bContract, uint256 _time) external onlyRFQContracts{
+    function setBContractCancelTimeMemory(bContract memory _bContract, uint256 _time) external {
         _bContract.cancelTime = _time;
     }
 
-    function setBContractPriceMemory(bContract memory _bContract, uint256 _price) external onlyRFQContracts {
+    function setBContractPriceMemory(bContract memory _bContract, uint256 _price) external  {
 
         _bContract.price = _price;
 
@@ -489,7 +482,7 @@ contract RFQTrade is Initializable, OwnableUpgradeable {
         bool isAPayingAPR, 
         address frontEndAffiliate, 
         address frontEndAffiliateAffiliate
-    ) external onlyRFQContracts {
+    ) external  {
             bContract storage newContract = bContracts[bContractID];
             newContract.initiator = initiator;
             newContract.price = price;
@@ -510,7 +503,7 @@ contract RFQTrade is Initializable, OwnableUpgradeable {
         uint256[] memory _limitOrStop, 
         address _initiator,
         uint256 _expiration
-    ) external onlyRFQContracts {
+    ) external  {
         bCloseQuote storage newQuote = bCloseQuotes[bCloseQuotesLength];
         newQuote.bContractIds = _bContractIds;
         newQuote.price = _price;
@@ -528,21 +521,30 @@ contract RFQTrade is Initializable, OwnableUpgradeable {
     function payOwed(uint256 amount, address target) public returns(uint256) {
         uint256 returnedAmount = 0;
 
-    if (totalOwedAmounts[target] == 0) { 
-        returnedAmount = amount;
-    } else if (totalOwedAmounts[target] >= amount) { 
-        totalOwedAmountPaids[target] += amount;
-        totalOwedAmounts[target] -= amount;
-    } else {
-        returnedAmount = amount - totalOwedAmounts[target];
-        totalOwedAmountPaids[target] = totalOwedAmounts[target];
-        totalOwedAmounts[target] = 0;
-    }
+        if (totalOwedAmounts[target] == 0) { 
+            returnedAmount = amount;
+        } else if (totalOwedAmounts[target] >= amount) { 
+            totalOwedAmountPaids[target] += amount;
+            totalOwedAmounts[target] -= amount;
+        } else {
+            returnedAmount = amount - totalOwedAmounts[target];
+            totalOwedAmountPaids[target] = totalOwedAmounts[target];
+            totalOwedAmounts[target] = 0;
+        }
 
     emit payOwedEvent(target, returnedAmount);
     return returnedAmount;
 }
 
+    function payAffiliates(
+        uint256 amount,
+        bContract memory _bContract
+        ) external   { 
+        balances[_bContract.frontEndAffiliate] += amount * FE_AFFILIATION;
+        balances[_bContract.frontEndAffiliateAffiliate] += amount * FE_AFFI_AFFILIATION;
+        balances[_bContract.backEndAffiliate] += amount * HB_AFFILIATION;
+        balances[RFQ_DAO] += amount * RFQ_DAO_DF_EVENT;
+    }
 
 
     function addToOwed(uint256 deficit, address target, address receiver) internal  { 
@@ -572,12 +574,12 @@ contract RFQTrade is Initializable, OwnableUpgradeable {
     }
 
 
-    function setOwedAmounts(address partyA, address partyB, uint256 amountA) external onlyRFQContracts() {
+    function setOwedAmounts(address partyA, address partyB, uint256 amountA) external {
             owedAmounts[partyA][partyB] = amountA;
         }  
 
 
-    function decreaseTotalOwedAmounts(address partyA, uint256 amount) external onlyRFQContracts() {
+    function decreaseTotalOwedAmounts(address partyA, uint256 amount) external  {
             totalOwedAmounts[partyA] -= amount;
         }  
 

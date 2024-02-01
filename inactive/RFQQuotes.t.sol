@@ -580,9 +580,6 @@ contract RFQTradeTestQuotes is Test {
         assertEq(uint(_bCloseQuote.state), uint(_State.Quote), "State should be set to Quote");
 
 
-
-
-
         }
 
 
