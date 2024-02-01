@@ -556,7 +556,7 @@ contract RFQTrade is Initializable, OwnableUpgradeable {
     }
 
 
-    function addToOwed(uint256 deficit, address target, address receiver) internal  { 
+    function addToOwed(uint256 deficit, address target, address receiver) external onlyRFQContracts  { 
         owedAmounts[target][receiver] += deficit;
         totalOwedAmounts[target] += deficit;
         emit addToOwedEvent(target, receiver, deficit);

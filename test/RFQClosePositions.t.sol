@@ -51,7 +51,7 @@ contract MockUSDC is IERC20 {
     }
 }
 
-contract RFQTradeTestQuotes is Test {
+contract RFQTradeTestClosePositions is Test {
 
     RFQTrade public rfq;
     RFQQuotes public rfqquotes;
@@ -430,7 +430,7 @@ contract RFQTradeTestQuotes is Test {
         // Check if the balances of parties A and B have been updated correctly
         // Check if the appropriate events are emitted
     }
-    
+
     function testCloseMarketFunding() public {
         uint256 depositAmount = 1000e18; // Minting 1000 mockUSDCs to Party A
         address partyA = address(0x1);
