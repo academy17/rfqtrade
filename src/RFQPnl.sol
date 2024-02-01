@@ -2,9 +2,15 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.19;
 
-import "./LiquidationsFunctionality.sol";
+import "./RFQTrade.sol";
 
-contract RFQPnl is LiquidationsFunctionality {
+contract RFQPnl is Initializable {
+
+    RFQTrade public rfq;
+
+    function initialize(address _rfq_address) public initializer {
+        rfq = RFQTrade(_rfq_address);
+    }
 
     function calculateuPnlPartyA(bContract memory _bContract, bOracle memory _bOracle, uint256 _price, uint256 amount)
     public
@@ -13,15 +19,13 @@ contract RFQPnl is LiquidationsFunctionality {
 {
     uint256 funding = (
         _bContract.interestRate * (block.timestamp - _bContract.openTime) * _bContract.price * amount
-    ) / 31536000; //fix
+    ) / 31536000; 
     uint256 fundingNormalized = funding / 1e18;
     uint256 uPnl;
     bool isNegative = false;
 
     if (_price >= _bContract.price) {
-        // This block now includes the case where _price is equal to _bContract.price
         uPnl = (_price - _bContract.price) * amount;
-        // Adjust for funding
         if (_bContract.isAPayingAPR) {
             if (uPnl > fundingNormalized) {
                 uPnl -= fundingNormalized;
@@ -56,8 +60,6 @@ contract RFQPnl is LiquidationsFunctionality {
 
     return (uPnl, isNegative, fundingNormalized);
 }
-    //probably unnecessary
-    //calculate uPnL from partyB perspective
     
 function calculateuPnlPartyB(bContract memory _bContract, bOracle memory _bOracle, uint256 _price, uint256 amount)
     public
@@ -66,28 +68,23 @@ function calculateuPnlPartyB(bContract memory _bContract, bOracle memory _bOracl
 {
     uint256 funding = (
             _bContract.interestRate * (block.timestamp - _bContract.openTime) * _bContract.price * amount
-        ) / 31536000; //fix
+        ) / 31536000; 
     uint256 fundingNormalized = funding / 1e18;
     uint256 uPnl;
     bool isNegative = false;
 
-    // Calculate PnL based on the current price and the contract price
     if (_price < _bContract.price) {
-        // If the price has decreased, it's a gain for partyB.
         uPnl = (_bContract.price - _price) * amount;
-        // Adjust for funding based on whether APR is being paid or received
         if (!_bContract.isAPayingAPR) {
             if (uPnl > fundingNormalized) {
                 uPnl -= fundingNormalized;
             } else {
-                uPnl = fundingNormalized - uPnl; // This could result in negative PnL
+                uPnl = fundingNormalized - uPnl;
                 isNegative = true;
             }
         } 
     } else if (_price > _bContract.price) {
-        // If the price has increased, it's a loss for partyB.
         uPnl = (_price - _bContract.price) * amount;
-        // This will always be negative so we just add funding to the loss
         if(_bContract.isAPayingAPR) {
             if(uPnl < fundingNormalized) {
                 uPnl = fundingNormalized - uPnl;
@@ -99,12 +96,11 @@ function calculateuPnlPartyB(bContract memory _bContract, bOracle memory _bOracl
             }
         }
     } else {
-        // When _price is equal to _bContract.price
         if (!_bContract.isAPayingAPR) {
-            uPnl = fundingNormalized; // Funding is the only loss
+            uPnl = fundingNormalized; 
             isNegative = true;
         } else {
-            uPnl = fundingNormalized; // Funding is the only profit
+            uPnl = fundingNormalized; 
         }
     }
 

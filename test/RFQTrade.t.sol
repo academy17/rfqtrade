@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 import {Test, console2} from "forge-std/Test.sol";
 import "../src/RFQTrade.sol";
 import "../src/RFQQuotes.sol";
+import "../src/RFQPnl.sol";
 //import "../src/RFQLiquidations.sol";
 //import "../src/RFQClosePositions.sol";
 
@@ -54,20 +55,21 @@ contract RFQTradeTest is Test {
 
     RFQTrade public rfq;
     RFQQuotes public rfqquotes;
+    RFQPnl public rfqPnl;
     //RFQLiquidations public rfqliquidations;
-    //RFQPnl public rfqPnl;
+
     //RFQClosePositions public rfqclosepositions;
 
     MockUSDC public mockUSDC;
     address public rfqDAO;
-    address public testoracleAddress;
     address oracleAddress;
+
     function setUp() public {
         mockUSDC = new MockUSDC();
         rfq = new RFQTrade();
         rfqquotes = new RFQQuotes();
         //rfqliquidations = new RFQLiquidations();
-        //rfqPnl = new RFQPnl();
+        rfqPnl = new RFQPnl();
         //rfqclosepositions = new RFQClosePositions();
         rfq.initialize(oracleAddress, address(mockUSDC));
         rfq.setDefaultVariables(20 * 1e18, 100, 20, 5 * 60, 6); //setting values
@@ -75,12 +77,14 @@ contract RFQTradeTest is Test {
         rfq.setQuotesContract(address(rfqquotes));
         //rfq.setLiquidationsContract(address(rfqliquidations));
         rfqquotes.initialize(address(rfq));
+        rfqPnl.initialize(address(rfq));
         //rfqliquidations.initialize(address(rfq), address(rfqPnl));
         //rfqclosepositions.initialize(address(rfq), address(rfqPnl));
     }
 
     function test_deploy() public {
         assertTrue(address(rfq) != address(0), "Contract not deployed");
+        assertTrue(address(rfqPnl) != address(0), "Contract not deployed");
         console2.log("rfq Contract Address:", address(rfq));
         uint256 _MINIMUM_NOTIONAL = 20 * 1e18;
         uint256 _FEE_AMOUNT_BASIS_POINTS = 100;
@@ -108,4 +112,50 @@ contract RFQTradeTest is Test {
         console.log("rfq partyA deposit successful. Deposited:", rfq.getBalance(partyA) / 1e18);
         vm.stopPrank();
     }
+
+    function testDeployPriceFeed() public {
+        address priceFeedAddress = address(0xdeadbeefdeadbeef);
+        uint256 maxDelay = 5;
+        bytes32 pythAddress = bytes32(0x0); 
+        uint256 initialMarginA = 1e17; 
+        uint256 initialMarginB = 1e17; 
+        uint256 defaultFundA = 5e16; 
+        uint256 defaultFundB = 5e16; 
+        uint256 expiryA = 7 days;
+        uint256 expiryB = 14 days;
+        uint256 timeLockA = 3 days;
+        uint256 timeLockB = 6 days;
+
+
+        rfq.deployPriceFeed(
+            maxDelay,
+            _Oracle.Dummy,
+            pythAddress,
+            initialMarginA,
+            initialMarginB,
+            defaultFundA,
+            defaultFundB,
+            expiryA,
+            expiryB,
+            timeLockA,
+            timeLockB
+        );
+        bOracle memory deployedOracle = rfq.getBOracle(rfq.getBOracleLength() - 1); // fix this, not sure why test breaks here.        assertEq(deployedOracle.priceFeedAddress, priceFeedAddress, "Incorrect priceFeedAddress");
+        assertEq(deployedOracle.maxDelay, maxDelay, "Incorrect maxDelay");
+        assertEq(uint(deployedOracle.oracleType), uint(_Oracle.Dummy), "Incorrect oracleType");
+        assertEq(deployedOracle.pythAddress, pythAddress, "Incorrect pythAddress");
+        assertEq(deployedOracle.initialMarginA, initialMarginA, "Incorrect initialMarginA");
+        assertEq(deployedOracle.initialMarginB, initialMarginB, "Incorrect initialMarginB");
+        assertEq(deployedOracle.defaultFundA, defaultFundA, "Incorrect defaultFundA");
+        assertEq(deployedOracle.defaultFundB, defaultFundB, "Incorrect defaultFundB");
+        assertEq(deployedOracle.expiryA, expiryA, "Incorrect expiryA");
+        assertEq(deployedOracle.expiryB, expiryB, "Incorrect expiryB");
+        assertEq(deployedOracle.timeLockA, timeLockA, "Incorrect timeLockA");
+        assertEq(deployedOracle.timeLockB, timeLockB, "Incorrect timeLockB");
+        console.log("Oracle Price Feed Successfully Deployed!");
+
+    }   
+
+
+
 }

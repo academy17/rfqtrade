@@ -114,7 +114,7 @@ contract RFQQuotes is Initializable {
                 partyBNewBalance -= ((oracle.initialMarginB + oracle.defaultFundB) * _acceptPrice * _bContract.qty) / 1e18;
                 rfq.setBalance(msg.sender, partyBNewBalance);
                 uint256 partyABetterQuoteBalance = rfq.getBalance(_bContract.partyA);
-                partyABetterQuoteBalance +=  ((1e18+(oracle.initialMarginA + oracle.defaultFundA)) * (_bContract.price - _acceptPrice ) * _bContract.qty / 1e18);
+                partyABetterQuoteBalance +=  (((oracle.initialMarginA + oracle.defaultFundA)) * (_bContract.price - _acceptPrice ) * _bContract.qty / 1e18);
                 rfq.setBalance(_bContract.partyA, partyABetterQuoteBalance);
                 rfq.setBContractPrice(_bContractId, _acceptPrice);
                 }
@@ -128,7 +128,7 @@ contract RFQQuotes is Initializable {
                 partyANewBalance -= ( oracle.initialMarginA + oracle.defaultFundA) * _acceptPrice * _bContract.qty / 1e18;
                 rfq.setBalance(msg.sender, partyANewBalance);
                 uint256 partyBBetterQuoteBalance = rfq.getBalance(_bContract.partyB);
-                partyBBetterQuoteBalance += (1e18-(oracle.initialMarginB + oracle.defaultFundB)) * (_acceptPrice - _bContract.price ) * _bContract.qty / 1e18;
+                partyBBetterQuoteBalance += ((oracle.initialMarginB + oracle.defaultFundB)) * (_acceptPrice - _bContract.price ) * _bContract.qty / 1e18;
                 rfq.setBalance(_bContract.partyB, partyBBetterQuoteBalance);
                 rfq.setBContractPrice(_bContractId, _acceptPrice);
                 }
@@ -272,6 +272,27 @@ contract RFQQuotes is Initializable {
         }
         //emit cancelOpenQuoteEvent(bContractId );
     }
+
+    function openCloseQuote(
+        uint256[] memory bContractIds,
+        uint256[] memory price, 
+        uint256[] memory qty, 
+        uint256[] memory limitOrStop, 
+        uint256 expiration,
+        address initiator
+    ) public {
+        require(bContractIds.length == price.length, "Arrays must be of the same length");
+        require(bContractIds.length == qty.length, "Arrays must be of the same length");
+        require(bContractIds.length == limitOrStop.length, "Arrays must be of the same length");
+        for(uint i = 0; i < bContractIds.length; i++) {
+        bContract memory _bContract = rfq.getBContractMemory(bContractIds[i]);
+        require(msg.sender == _bContract.partyA || msg.sender == _bContract.partyB,
+            "Sender must be partyA or partyB of the bContract"
+        );
+        }
+        rfq.setBContractCloseQuote(bContractIds, price, qty, limitOrStop, msg.sender, expiration);
+    }
+
 
     function cancelOpenCloseQuoteBatch(uint256 bCloseQuoteId) public {
         bCloseQuote memory quote = rfq.getBCloseQuote(bCloseQuoteId);

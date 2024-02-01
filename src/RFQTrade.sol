@@ -262,7 +262,7 @@ contract RFQTrade is Initializable, OwnableUpgradeable {
 
         int256 intermediate = int256(value);
         uint256 convertedValue = uint256(intermediate);
-
+ 
         return convertedValue;
         }
 
